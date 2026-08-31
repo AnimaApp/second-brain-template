@@ -16,93 +16,72 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from reference_agent.bundle.document import OKFDocument
-from reference_agent.bundle.index import regenerate_indexes
+from okf_tools.bundle.document import OKFDocument
+from okf_tools.bundle.index import (
+    build_index_contents,
+    find_index_drift,
+    regenerate_indexes,
+)
 
 
-def _stub_synth(rel: str, children: list[tuple[str, str]], *, model: str) -> str:
-    return f"stub: {len(children)} items"
-
-
-def _write_doc(path: Path, type_: str, title: str, description: str) -> None:
+def _write_concept(path: Path, type_name: str, title: str, description: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    doc = OKFDocument(
+    document = OKFDocument(
         frontmatter={
-            "type": type_,
+            "type": type_name,
             "title": title,
             "description": description,
-            "generated": {"by": "reference_agent/stub", "at": "2026-05-27T00:00:00+00:00"},
         },
-        body=f"# {title}\n\n{description}\n",
+        body=f"# {title}\n",
     )
-    path.write_text(doc.serialize(), encoding="utf-8")
+    path.write_text(document.serialize(), encoding="utf-8")
 
 
-def test_regenerate_groups_by_type_and_links_relative(tmp_path: Path):
-    root = tmp_path / "bundle"
-    _write_doc(
-        root / "datasets" / "ga4.md",
-        "BigQuery Dataset",
-        "GA4 Dataset",
-        "GA4 obfuscated ecommerce sample.",
+def test_indexes_are_deterministic_and_preserve_root_version(tmp_path: Path):
+    bundle = tmp_path / "bundle"
+    _write_concept(bundle / "projects" / "alpha.md", "Project", "Alpha", "First project.")
+    _write_concept(bundle / "decisions" / "format.md", "Decision", "Format", "Use OKF.")
+    (bundle / "index.md").write_text(
+        '---\nokf_version: "0.2"\n---\n\n# Old\n\n* [Old](old.md)\n',
+        encoding="utf-8",
     )
-    _write_doc(
-        root / "tables" / "events_.md",
-        "BigQuery Table",
-        "events_*",
-        "Daily-sharded GA4 event tables.",
-    )
-    _write_doc(
-        root / "tables" / "users.md",
-        "BigQuery Table",
-        "users",
-        "Per-user dimension.",
+    (bundle / "log.md").write_text(
+        "# Directory Update Log\n\n## 2026-08-31\n* Added concepts.\n",
+        encoding="utf-8",
     )
 
-    written = regenerate_indexes(root, model="stub", synthesize=_stub_synth)
-    written_names = {p.parent.name for p in written}
-    assert {"bundle", "datasets", "tables"} <= written_names | {root.name}
+    assert find_index_drift(bundle)
+    regenerate_indexes(bundle)
+    first = build_index_contents(bundle)
+    assert not find_index_drift(bundle)
+    assert regenerate_indexes(bundle) == []
+    assert build_index_contents(bundle) == first
 
-    tables_index = (root / "tables" / "index.md").read_text(encoding="utf-8")
-    assert tables_index.startswith("# BigQuery Table")
-    assert "[events_*](events_.md)" in tables_index
-    assert "[users](users.md)" in tables_index
-    assert "Daily-sharded GA4 event tables." in tables_index
-
-    root_index = (root / "index.md").read_text(encoding="utf-8")
-    assert "# Subdirectories" in root_index
-    assert "(datasets/index.md) - GA4 obfuscated ecommerce sample." in root_index
-    assert "(tables/index.md) - stub: 2 items" in root_index
+    root_index = (bundle / "index.md").read_text(encoding="utf-8")
+    assert root_index.startswith('---\nokf_version: "0.2"\n---')
+    assert "log.md" not in root_index
+    assert "decisions/index.md" in root_index
+    assert "projects/index.md" in root_index
 
 
-def test_regenerate_skips_empty_directories(tmp_path: Path):
-    root = tmp_path / "bundle"
-    root.mkdir()
-    (root / "empty_dir").mkdir()
-
-    written = regenerate_indexes(root, model="stub", synthesize=_stub_synth)
-    assert written == []
-    assert not (root / "empty_dir" / "index.md").exists()
-
-
-def test_regenerate_single_child_reuses_description(tmp_path: Path):
-    root = tmp_path / "bundle"
-    _write_doc(
-        root / "datasets" / "only.md",
-        "BigQuery Dataset",
-        "Only Dataset",
-        "The only dataset in this bundle.",
+def test_generator_excludes_reserved_files(tmp_path: Path):
+    bundle = tmp_path / "bundle"
+    _write_concept(bundle / "notes" / "one.md", "Memory", "One", "One memory.")
+    (bundle / "notes" / "log.md").write_text(
+        "# Directory Update Log\n\n## 2026-08-31\n* Added one.\n",
+        encoding="utf-8",
     )
+    regenerate_indexes(bundle)
+    index = (bundle / "notes" / "index.md").read_text(encoding="utf-8")
+    assert "one.md" in index
+    assert "log.md" not in index
 
-    call_count = 0
 
-    def counting_synth(rel: str, children, *, model: str) -> str:
-        nonlocal call_count
-        call_count += 1
-        return f"stub: {len(children)} items"
+def test_generator_removes_obsolete_index(tmp_path: Path):
+    bundle = tmp_path / "bundle"
+    obsolete = bundle / "empty" / "index.md"
+    obsolete.parent.mkdir(parents=True)
+    obsolete.write_text("# Empty\n\n* [Gone](gone.md)\n", encoding="utf-8")
 
-    regenerate_indexes(root, model="stub", synthesize=counting_synth)
-
-    root_index = (root / "index.md").read_text(encoding="utf-8")
-    assert "(datasets/index.md) - The only dataset in this bundle." in root_index
-    assert call_count == 0
+    regenerate_indexes(bundle)
+    assert not obsolete.exists()

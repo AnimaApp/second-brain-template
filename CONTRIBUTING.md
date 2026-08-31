@@ -1,43 +1,26 @@
 # Contributing
 
-Thanks for your interest in contributing to the Open Knowledge Format (OKF)!
+Contributions fall into three groups:
 
-Contributions generally fall into two categories, and they are reviewed
-differently:
+- Changes to [SPEC.md](SPEC.md) change the Open Knowledge Format standard.
+  Open an issue before a format change.
+- Changes to `src/okf_tools/` change deterministic bundle tools.
+- Changes to `bundles/second-brain/` change the starter memory bundle.
 
-- **The format itself** ([`SPEC.md`](SPEC.md)) — OKF aims to be a universal,
-  vendor-neutral format, so spec changes are held to a higher bar. Open an
-  issue describing the problem and the proposed change before sending a pull
-  request, so the design can be discussed first.
-- **The reference agent, viewer, samples, and bundles** — proof-of-concept
-  tooling that demonstrates producing and consuming OKF. Ordinary pull
-  requests are welcome.
+Before you submit a pull request:
 
-To get started contributing:
-
-1. Sign a Contributor License Agreement (see details below).
-1. Fork the repo, develop and test your code changes.
-1. Ensure that your code adheres to the existing style.
-1. Ensure that your code has an appropriate set of unit tests which all pass.
-1. Ensure that all tests pass by running `.venv/bin/pytest` (see
-   [README.md](README.md) for environment setup).
-1. Submit a pull request.
+1. Install the development dependencies from [README.md](README.md).
+2. Run `okf index bundles/second-brain`.
+3. Run `okf check bundles/second-brain`.
+4. Run `pytest`.
+5. Run `pre-commit run --all-files`.
 
 ## Contributor License Agreement
 
-Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
-
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
+Contributions must include a Contributor License Agreement. You retain the
+copyright to your contribution and give the project permission to distribute
+it. See <https://cla.developers.google.com/>.
 
 ## Code reviews
 
-All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose. Consult
-[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
+All submissions need review through a GitHub pull request.

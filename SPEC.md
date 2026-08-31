@@ -176,8 +176,8 @@ tags: [<tag>, <tag>, ...]          # Optional
 
 - `type`: A short string identifying the kind of concept. Consumers use it
   for routing, filtering, and presentation. Example values:
-  `BigQuery Table`, `BigQuery Dataset`, `API Endpoint`, `Metric`,
-  `Playbook`, `Reference`, `Attested Computation`.
+  `Project`, `Decision`, `API Endpoint`, `Metric`, `Playbook`, `Reference`,
+  `Attested Computation`.
 
   Type values are **not** registered centrally. Producers SHOULD pick
   values that are descriptive and self-explanatory; consumers MUST
@@ -228,26 +228,25 @@ Per-claim attribution to external sources uses markdown footnotes keyed to
 
 ```markdown
 ---
-type: BigQuery Table
-title: Customer Orders
-description: One row per completed customer order across all channels.
-resource: https://console.cloud.google.com/bigquery?p=acme&d=sales&t=orders
-tags: [sales, orders, revenue]
-generated: { by: reference_agent/gemini-2.5-pro, at: 2026-05-28T14:30:00Z }
+type: Repository Module
+title: Authentication package
+description: Implements user authentication and session checks.
+resource: https://example.com/example/repository/tree/main/src/auth
+tags: [repository, authentication, security]
+generated: { by: coding-agent/1.0, at: 2026-05-28T14:30:00Z }
 ---
 
 # Schema
 
-| Column        | Type      | Description                              |
-|---------------|-----------|------------------------------------------|
-| `order_id`    | STRING    | Globally unique order identifier.        |
-| `customer_id` | STRING    | Foreign key into [customers](/tables/customers.md). |
-| `total_usd`   | NUMERIC   | Order total in US dollars.               |
-| `placed_at`   | TIMESTAMP | When the customer submitted the order.   |
+| Field          | Type   | Description                                     |
+|----------------|--------|-------------------------------------------------|
+| `user_id`      | string | Stable user identifier.                         |
+| `session_id`   | string | Identifier described by [sessions](/modules/sessions.md). |
+| `expires_at`   | time   | Time after which the session is invalid.        |
 
-# Joins
+# Relationships
 
-Joined with [customers](/tables/customers.md) on `customer_id`.
+Uses [sessions](/modules/sessions.md) to check active user sessions.
 ```
 
 ### 4.4 Example: a concept not bound to a resource
@@ -255,20 +254,20 @@ Joined with [customers](/tables/customers.md) on `customer_id`.
 ```markdown
 ---
 type: Playbook
-title: "Incident response: data freshness alert"
-description: Steps to triage a freshness alert on the orders pipeline.
-tags: [oncall, incident]
+title: "Review a failing test suite"
+description: Steps to find the cause of a new test failure.
+tags: [testing, debugging]
 generated: { by: human:ahormati, at: 2026-04-12T09:00:00Z }
 ---
 
 # Trigger
 
-A freshness alert fires when `orders` lags more than 30 minutes behind its
-expected SLA. See the [orders table](/tables/orders.md).
+A required test fails after a repository change. See the
+[test policy](/policies/testing.md).
 
 # Steps
 
-1. Check the [ingestion job dashboard](https://example.com/dash).
+1. Check the first failing test and its error output.
 2. ...
 ```
 
@@ -291,11 +290,11 @@ internal to the bundle.
 
 ```yaml
 sources:
-  - id: ga4-schema
-    resource: https://developers.google.com/analytics/bigquery/export-schema
-    title: GA4 BigQuery Export schema
-    author: team:ga4-docs
-    usage_count: 5000
+  - id: architecture-guide
+    resource: references/architecture-guide.md
+    title: Repository architecture guide
+    author: process:architecture-docs
+    usage_count: 500
     last_modified: 2026-05-30T00:00:00Z
 usage_window: { from: 2026-06-01T00:00:00Z, to: 2026-06-30T00:00:00Z }
 ```
@@ -305,7 +304,7 @@ Each `sources` entry:
 - `resource`: REQUIRED within an entry. Names either a concrete artifact a
   consumer can follow (an absolute URL, a bundle-relative path, or a path
   into a `references/` subdirectory, §6) or a population or scope descriptor
-  it cannot (for example `all queries in BigQuery project X`).
+  it cannot (for example `all design reviews for repository X`).
 - `id`: Optional. A stable key used to attribute individual claims (see
   below). SHOULD be present when the body cites the source.
 - `title`: Optional. Human-readable label for the source.
@@ -351,9 +350,9 @@ carry only their intrinsic signals. Deeper lineage (an explicit external
 footnote whose label is a `sources[].id`:
 
 ```markdown
-The `events_` table is sharded daily as `events_YYYYMMDD`.[^ga4-schema]
+The authentication package owns session validation.[^architecture-guide]
 
-[^ga4-schema]: GA4 BigQuery Export schema
+[^architecture-guide]: Repository architecture guide
 ```
 
 The footnote label is the join key into `sources`; consumers resolve
@@ -371,7 +370,7 @@ records who or what has confirmed the content against its sources or
 be who *confirmed* it.
 
 ```yaml
-generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-20T22:53:05Z }
+generated: { by: coding-agent/1.0, at: 2026-06-20T22:53:05Z }
 ```
 
 - `generated.by`: REQUIRED within `generated`. An actor (§7).
@@ -382,7 +381,7 @@ generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-20T22:53:05Z }
 ```yaml
 verified:
   - { by: human:ahormati, at: 2026-06-25T09:00:00Z }
-  - { by: process:finance-nightly, at: 2026-06-26T02:00:00Z }
+  - { by: process:repository-nightly, at: 2026-06-26T02:00:00Z }
 ```
 
 - `verified`: A list of verification events, each with `by` (an actor) and
@@ -474,14 +473,14 @@ case it is not a path. Each path-valued field accepts:
 
 - an absolute URL (for example `https://...`),
 - a bundle-relative path beginning with `/`, or
-- a relative path (for example `../computations/revenue.md`).
+- a relative path (for example `../computations/test-count.md`).
 
 ### 6.3 The `references/` convention
 
 A `references/` subdirectory conventionally mirrors external material, run
 instructions, or code as first-class concepts within the bundle. Sources,
 executors, and attesters commonly point into it (for example
-`references/attesters/revenue.py`). It is a naming convention, not a
+`references/attesters/output-hash.py`). It is a naming convention, not a
 requirement.
 
 ---
@@ -492,10 +491,10 @@ Fields that record an identity (`generated.by`, `verified[].by`) use a
 single actor convention:
 
 - `<producer>/<version>` for agents and tools, for example
-  `reference_agent/gemini-2.5-pro`.
+  `coding-agent/1.0`.
 - `human:<id>` for a person, for example `human:ahormati`.
 - `process:<id>` for an automated process, for example
-  `process:finance-nightly`.
+  `process:repository-nightly`.
 
 Consumers that classify trust (§5.3) key off the `human:` prefix, so
 producers MUST use it for hand-authored or human-confirmed content.
@@ -540,8 +539,8 @@ date-grouped entries, newest first:
 # Directory Update Log
 
 ## 2026-05-22
-* **Update**: Added a BigQuery table reference for [Customer Metrics](/tables/customer-metrics.md).
-* **Creation**: Established the [Dataplex Playbook](/playbooks/dataplex.md).
+* **Update**: Added a source to the [Authentication Decision](/decisions/authentication.md).
+* **Creation**: Established the [Test Failure Playbook](/playbooks/test-failure.md).
 
 ## 2026-05-15
 * **Initialization**: Created foundational directory structure.
@@ -566,18 +565,18 @@ and the means to check it; it does not execute anything itself.
 
 A sanctioned computation is a standalone concept of
 `type: Attested Computation`. A concept that needs the value (a `Metric`, a
-`BigQuery Table`) links to it with a normal markdown link (§6). Three
+`Repository Report`) links to it with a normal markdown link (§6). Three
 properties motivate the standalone concept:
 
-- **`runtime` defines what `parameters` mean.** A parameter is a SQL bind
-  variable, a dbt var, or a Python argument depending on the runtime.
+- **`runtime` defines what `parameters` mean.** A parameter can be a command
+  argument, a Python argument, or another runtime-specific value.
   Keeping `runtime` and `parameters` in one frontmatter makes the binding
   semantics self-evident.
 - **One computation, many consumers.** The same computation can back a
-  metric, a dashboard concept, and a report; as a concept it is referenced
+  metric, a project concept, and a report; as a concept it is referenced
   once and reused.
 - **Trust state is per computation.** `verified`, `stale_after`, and a
-  single `attester` describe one thing. Revenue, profit, and margin each
+  single `attester` describe one thing. Test count, dependency count, and coverage each
   verify and attest independently, which is three concepts, not three
   entries in one frontmatter.
 
@@ -589,8 +588,8 @@ concept carries:
 
 - `runtime`: REQUIRED for this type. The single field that says how to run
   the computation, and so how the executor and attester interpret it and
-  what `parameters` mean. Example values: `bigquery`, `postgres`, `dbt`,
-  `python`, `Looker`.
+  what `parameters` mean. Example values: `python`, `shell`, `javascript`,
+  `container`.
 - `parameters`: A list of the typed, named holes the agent may fill. Each
   entry: `{ name, type, required }`. Binding semantics follow `runtime`.
 - `computation`: Optional. A path (§6.2) to a file holding the
@@ -599,8 +598,8 @@ concept carries:
 - `executor`: How the computation is run. `resource` names run
   instructions or code; a runner (an agent, or deterministic consumer
   code) follows it. `receipt` declares the fields a run must return, the
-  evidence the attester inspects (for example a BigQuery `job_id` and the
-  SQL the job actually executed).
+  evidence the attester inspects (for example a script hash, arguments, and
+  the result the script returned).
 - `attester`: The deterministic check. `resource` names code (no LLM) that
   takes a receipt and returns a verdict. It is meant to run consumer-side.
 
@@ -610,36 +609,39 @@ packaging choice; OKF fixes the interface, not the packaging (§1).
 ```markdown
 ---
 type: Attested Computation
-title: Revenue for fiscal year
-description: Recognized revenue for a fiscal year, per Finance's definition.
+title: Count repository tests
+description: Count Python test files under a repository path.
 status: stable
-runtime: bigquery
+runtime: python
 parameters:
-  - { name: year, type: integer, required: true }
+  - { name: root, type: path, required: true }
 executor:
-  resource: references/skills/run-on-bq.md
-  receipt: [job_id, executed_sql, result]
+  resource: references/skills/run-python.md
+  receipt: [script_sha256, arguments, result]
 attester:
-  resource: references/attesters/revenue.py
-generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-20T22:53:05Z }
-verified: { by: human:ahormati, at: 2026-06-25T09:00:00Z }
+  resource: references/attesters/output-hash.py
+generated: { by: coding-agent/1.0, at: 2026-06-20T22:53:05Z }
+verified: { by: human:owner, at: 2026-06-25T09:00:00Z }
 stale_after: 2026-09-23T00:00:00Z
 sources:
-  - id: rev-policy
-    resource: https://wiki.acme/finance/revenue-recognition
-    title: Revenue recognition policy
+  - id: test-policy
+    resource: ../policies/testing.md
+    title: Repository test policy
 ---
 
 # Computation
 
-    SELECT SUM(amount) AS revenue
-    FROM finance.recognized_revenue
-    WHERE fiscal_year = @year
+```python
+from pathlib import Path
 
-The computation binds only the declared `parameters`, per the recognition
-policy.[^rev-policy]
+def compute(root):
+    return sum(1 for path in Path(root).rglob("test_*.py"))
+```
 
-[^rev-policy]: Revenue recognition policy
+The computation binds only the declared `parameters`, per the repository
+test policy.[^test-policy]
+
+[^test-policy]: Repository test policy
 ```
 
 ### 10.3 The computation
@@ -653,10 +655,10 @@ Provide the computation in one of two ways:
   file shared with non-OKF tooling.
 
 ```yaml
-runtime: bigquery
-computation: references/computations/lib/revenue.sql
+runtime: python
+computation: references/computations/test_count.py
 parameters:
-  - { name: year, type: integer, required: true }
+  - { name: root, type: path, required: true }
 ```
 
 The agent MAY only supply *values* for the declared `parameters`; it MUST
@@ -664,35 +666,35 @@ NOT author or edit the computation. Binding `computation` with the
 parameter values into the executable artifact is the consumer's job, and
 the attester independently re-derives that same binding to compare against
 what actually ran. Because the comparison is on the expanded, compiled
-artifact the receipt carries (`executed_sql`, `compiled_sql`), a rewritten
-query, a swapped computation file, or a mutated dependency fails the check.
+artifact the receipt carries (`script_sha256`, `arguments`), rewritten code,
+a swapped computation file, or a mutated dependency fails the check.
 A typed, parameter-only surface is what makes "did the sanctioned thing
 run" a mechanical comparison rather than a judgement call.
 
 ### 10.4 Concepts that use a computation
 
-A document is rarely a single computation. An income-statement overview
-that discusses revenue, profit, and margin stays one readable concept and
+A document is rarely a single computation. A release-readiness overview
+that discusses test count, dependency count, and coverage stays one readable concept and
 links to one Attested Computation per figure:
 
 ```markdown
 ---
-type: Metric
-title: Revenue
-description: Recognized revenue for a fiscal year.
-tags: [finance, revenue]
+type: Repository Report
+title: Release readiness
+description: Current repository checks for a planned release.
+tags: [repository, release, testing]
 status: stable
-generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-20T22:53:05Z }
+generated: { by: coding-agent/1.0, at: 2026-06-20T22:53:05Z }
 ---
 
 # Definition
 
-Recognized revenue sums `amount` over rows booked to the fiscal year,
-computed by [the revenue computation](../computations/revenue.md).
+The repository test count is produced by
+[the test-count computation](../computations/test-count.md).
 ```
 
-Because each computation is its own concept, revenue can be fresh while
-profit is past its `stale_after`, and each attests on its own run.
+Because each computation is its own concept, test count can be fresh while
+coverage is past its `stale_after`, and each attests on its own run.
 Co-locating them is a directory choice (a `computations/` folder with an
 `index.md`), not a frontmatter one.
 
@@ -711,9 +713,9 @@ are **not** stored in the bundle.
    receipt shaped by `executor.receipt`.
 5. **Attest**: the consumer runs the attester over the receipt. It
    confirms provenance (the computation that ran equals `computation` bound
-   with the claimed parameters, not agent-authored SQL) and fidelity (the
-   displayed value matches the receipt's authoritative source, re-read by
-   job id rather than taken from the agent's text).
+   with the claimed parameters, not agent-authored code) and fidelity (the
+   displayed value matches the receipt's authoritative output rather than
+   the agent's text).
 6. **Gate**: refuse to display a failing attestation; warn or refuse when
    `now >= stale_after`. On success, surface the verdict (for example a
    link to the job log) so trust is visible.
@@ -788,8 +790,8 @@ The following are intentionally left to a future revision:
 - The attester ABI, portability, and sandboxing, likely bundled with
   future work on serving and Skills.
 - Attestation caching.
-- Semantic-layer templates (Looker, dbt) where the attester comparison
-  shifts from SQL equality to model-and-binding equality.
+- Framework templates where attester comparison shifts from source equality
+  to model-and-binding equality.
 
 ---
 
@@ -831,122 +833,114 @@ unchanged.
 
 ---
 
-## Appendix A: Worked example, an income statement
+## Appendix A: Worked example, a release-readiness report
 
-One bundle exercising every family, shown as a v0.1 to v0.2 migration of an
-income statement with two figures, revenue and gross profit.
+One bundle exercises every family. It shows a v0.1 to v0.2 migration of a
+release-readiness report with two computed facts.
 
 ### v0.1 form
 
-A single doc: both figures in one concept, the SQL in prose an agent can
-read, ignore, or rewrite, citations a flat list, and the only timestamp is
-`timestamp`.
+A single document keeps both calculations in prose. It uses a flat citations
+list and the legacy `timestamp` field.
 
 ```markdown
 ---
-type: Metric
-title: Income statement (fiscal year)
-description: Headline income-statement figures for a fiscal year.
-tags: [finance, income-statement]
+type: Repository Report
+title: Release readiness
+description: Current checks for a planned repository release.
+tags: [repository, release, testing]
 timestamp: '2026-05-28T22:53:05+00:00'
 ---
 
 # Definition
-The income statement reports revenue and gross profit for a fiscal year.
+The report gives the test-file count and direct-dependency count.
 
-# Revenue
-Recognized revenue sums `amount` over rows booked to the fiscal year:
+# Test files
 
-    SELECT SUM(amount) AS revenue
-    FROM finance.recognized_revenue
-    WHERE fiscal_year = <year>
+    len(list(Path(root).rglob("test_*.py")))
 
-# Gross profit
-Gross profit by segment, per the cost-allocation standard:
+# Direct dependencies
 
-    SELECT gross_profit FROM fct_income_statement
-    WHERE fiscal_year = <year> AND segment = <segment>
+    len(project["dependencies"])
 
 # Citations
-- https://wiki.acme/finance/fpa-handbook
-- https://wiki.acme/finance/revenue-recognition
-- https://wiki.acme/finance/cost-allocation
+- policies/testing.md
+- policies/dependencies.md
+- references/release-checklist.md
 ```
 
 ### v0.2 form
 
-The two figures split into attested computations linked from a narrative
-concept. Every family is populated, and the two computations sit in
-deliberately different states so one consumer reaches two verdicts.
+The two facts split into attested computations linked from one narrative
+concept. The computations have different trust and freshness states.
 
 ```
-bundles/finance/
-  metrics/income-statement.md      type: Metric  (narrates, links both)
-  computations/revenue.md          type: Attested Computation  (runtime: bigquery)
-  computations/profit.md           type: Attested Computation  (runtime: dbt)
-  references/skills/run-on-bq.md, run-dbt.md
-  references/attesters/sql-equality.py, dbt-binding.py
+bundles/repository-memory/
+  reports/release-readiness.md       type: Repository Report
+  computations/test-count.md         type: Attested Computation  (runtime: python)
+  computations/dependency-count.md   type: Attested Computation  (runtime: python)
+  references/skills/run-python.md
+  references/attesters/output-hash.py, dependency-lock.py
 ```
 
-`metrics/income-statement.md`, the readable doc; trust lives on what it
-links, not here:
+`reports/release-readiness.md` is the readable concept. Trust belongs to the
+computations that it links:
 
 ```markdown
 ---
-type: Metric
-title: Income statement (fiscal year)
-description: Headline income-statement figures for a fiscal year.
-tags: [finance, income-statement]
+type: Repository Report
+title: Release readiness
+description: Current checks for a planned repository release.
+tags: [repository, release, testing]
 status: stable
-generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-20T22:53:05Z }
-verified: { by: human:ahormati, at: 2026-06-25T09:00:00Z }
+generated: { by: coding-agent/1.0, at: 2026-06-20T22:53:05Z }
+verified: { by: human:owner, at: 2026-06-25T09:00:00Z }
 stale_after: 2026-12-31T00:00:00Z
 sources:
-  - id: fpa-handbook
-    resource: https://wiki.acme/finance/fpa-handbook
-    title: FP&A reporting handbook
+  - id: release-checklist
+    resource: ../references/release-checklist.md
+    title: Repository release checklist
 ---
 
 # Definition
-The income statement reports [revenue](../computations/revenue.md) and
-[gross profit](../computations/profit.md) for a fiscal year, per the FP&A
-reporting handbook.[^fpa-handbook] Each figure is produced by a sanctioned,
-attestable computation; this concept only narrates them.
+The report links the [test count](../computations/test-count.md) and
+[dependency count](../computations/dependency-count.md) required by the
+release checklist.[^release-checklist]
 
-[^fpa-handbook]: FP&A reporting handbook
+[^release-checklist]: Repository release checklist
 ```
 
-`computations/revenue.md`, BigQuery SQL, human-verified, fresh, and
-corroborated by a live dashboard source carrying credibility signals:
+`computations/test-count.md` is human-verified, fresh, and supported by a
+frequently used test policy:
 
 ```markdown
 ---
 type: Attested Computation
-title: Revenue for fiscal year
-description: Recognized revenue for a fiscal year, per Finance's definition.
-tags: [finance, revenue]
+title: Repository test-file count
+description: Count Python test files under a repository path.
+tags: [repository, testing]
 status: stable
-runtime: bigquery
+runtime: python
 parameters:
-  - { name: year, type: integer, required: true }
+  - { name: root, type: path, required: true }
 executor:
-  resource: references/skills/run-on-bq.md
-  receipt: [job_id, executed_sql, result]
+  resource: ../references/skills/run-python.md
+  receipt: [script_sha256, arguments, result]
 attester:
-  resource: references/attesters/sql-equality.py
-generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-28T14:00:00Z }
-verified: { by: human:ahormati, at: 2026-06-25T09:00:00Z }
+  resource: ../references/attesters/output-hash.py
+generated: { by: coding-agent/1.0, at: 2026-06-28T14:00:00Z }
+verified: { by: human:owner, at: 2026-06-25T09:00:00Z }
 stale_after: 2026-12-31T00:00:00Z
 sources:
-  - id: rev-policy
-    resource: https://wiki.acme/finance/revenue-recognition
-    title: Revenue recognition policy
-    author: team:finance-fpa
+  - id: test-policy
+    resource: ../policies/testing.md
+    title: Repository test policy
+    author: process:maintainer-docs
     last_modified: 2026-04-02T00:00:00Z
-  - id: exec-rev-dash
-    resource: dashboards/exec-revenue
-    title: Executive revenue dashboard
-    author: team:finance-fpa
+  - id: test-runs
+    resource: all required test runs for repository X
+    title: Required repository test runs
+    author: process:repository-ci
     usage_count: 5000
     last_modified: 2026-06-18T00:00:00Z
 usage_window: { from: 2026-06-01T00:00:00Z, to: 2026-06-30T00:00:00Z }
@@ -954,53 +948,59 @@ usage_window: { from: 2026-06-01T00:00:00Z, to: 2026-06-30T00:00:00Z }
 
 # Computation
 
-    SELECT SUM(amount) AS revenue
-    FROM finance.recognized_revenue
-    WHERE fiscal_year = @year
+```python
+from pathlib import Path
 
-Recognized revenue per the recognition policy,[^rev-policy] corroborated by
-the executive revenue dashboard.[^exec-rev-dash]
-
-[^rev-policy]: Revenue recognition policy
-[^exec-rev-dash]: Executive revenue dashboard
+def compute(root):
+    return sum(1 for path in Path(root).rglob("test_*.py"))
 ```
 
-`computations/profit.md`, a dbt model, process-verified, and past its
+The result follows the test policy[^test-policy] and is exercised by required
+test runs.[^test-runs]
+
+[^test-policy]: Repository test policy
+[^test-runs]: Required repository test runs
+```
+
+`computations/dependency-count.md` is process-verified and past its
 `stale_after`:
 
 ```markdown
 ---
 type: Attested Computation
-title: Gross profit for fiscal year
-description: Gross profit by segment for a fiscal year, per the cost-allocation standard.
-tags: [finance, profit]
+title: Direct dependency count
+description: Count direct dependencies declared by the project.
+tags: [repository, dependencies]
 status: stable
-runtime: dbt
+runtime: python
 parameters:
-  - { name: year, type: integer, required: true }
-  - { name: segment, type: string, required: true }
+  - { name: project_file, type: path, required: true }
 executor:
-  resource: references/skills/run-dbt.md
-  receipt: [run_id, compiled_sql, result]
+  resource: ../references/skills/run-python.md
+  receipt: [script_sha256, arguments, result]
 attester:
-  resource: references/attesters/dbt-binding.py
-generated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-14T14:00:00Z }
-verified: { by: process:finance-nightly, at: 2026-06-12T08:00:00Z }
+  resource: ../references/attesters/dependency-lock.py
+generated: { by: coding-agent/1.0, at: 2026-06-14T14:00:00Z }
+verified: { by: process:repository-nightly, at: 2026-06-12T08:00:00Z }
 stale_after: 2026-06-15T00:00:00Z
 sources:
-  - id: cost-alloc
-    resource: https://wiki.acme/finance/cost-allocation
-    title: Cost allocation standard
+  - id: dependency-policy
+    resource: ../policies/dependencies.md
+    title: Repository dependency policy
 ---
 
 # Computation
 
-    SELECT gross_profit
-    FROM {{ ref('fct_income_statement') }}
-    WHERE fiscal_year = {{ var('year') }}
-      AND segment = {{ var('segment') }}
+```python
+import tomllib
 
-Gross profit by segment per the cost-allocation standard.[^cost-alloc]
+def compute(project_file):
+    with open(project_file, "rb") as stream:
+        project = tomllib.load(stream)["project"]
+    return len(project.get("dependencies", []))
+```
 
-[^cost-alloc]: Cost allocation standard
+The result follows the repository dependency policy.[^dependency-policy]
+
+[^dependency-policy]: Repository dependency policy
 ```
