@@ -24,7 +24,7 @@ def _write_concept(path: Path, body: str = "") -> None:
     path.write_text(f"---\ntype: Memory\n---\n\n{body}", encoding="utf-8")
 
 
-def test_cli_validate_index_check_and_visualize(tmp_path: Path):
+def test_cli_validate_index_and_check(tmp_path: Path):
     bundle = tmp_path / "bundle"
     _write_concept(bundle / "notes" / "one.md")
 
@@ -33,18 +33,6 @@ def test_cli_validate_index_check_and_visualize(tmp_path: Path):
     assert main(["index", str(bundle)]) == 0
     assert main(["index", "--check", str(bundle)]) == 0
     assert main(["check", str(bundle)]) == 0
-    output = tmp_path / "viewer.html"
-    assert main(["visualize", str(bundle), "--out", str(output)]) == 0
-    assert output.exists()
-
-
-def test_cli_visualize_defaults_to_index_html(tmp_path: Path, monkeypatch):
-    bundle = tmp_path / "bundle"
-    _write_concept(bundle / "notes" / "one.md")
-    monkeypatch.chdir(tmp_path)
-
-    assert main(["visualize", str(bundle)]) == 0
-    assert (tmp_path / "index.html").exists()
 
 
 def test_validate_allows_warning_but_check_fails(tmp_path: Path):
@@ -58,4 +46,3 @@ def test_cli_reports_missing_bundle(tmp_path: Path):
     missing = tmp_path / "missing"
     assert main(["validate", str(missing)]) == 1
     assert main(["index", str(missing)]) == 1
-    assert main(["visualize", str(missing)]) == 1

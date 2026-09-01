@@ -11,6 +11,7 @@ It does not need a model API, database, ingestion pipeline, or cloud account.
 ```text
 brain/                  The memory bundle
 okf_tools/              Deterministic OKF tools
+viewer/                 Vite and React viewer source
 tests/                  Tool and conformance tests
 AGENTS.md               Entry point for agents that read AGENTS.md
 CLAUDE.md               Entry point for Claude Code
@@ -34,6 +35,12 @@ Install the local commit hook:
 
 ```sh
 .venv/bin/pre-commit install
+```
+
+Install the viewer dependencies with Node.js 20.19 or newer:
+
+```sh
+npm install
 ```
 
 ## Memory workflow
@@ -82,15 +89,25 @@ links, and missing indexes as the SPEC requires.
 The generator is deterministic. It preserves `okf_version` in the root index
 and excludes the reserved `index.md` and `log.md` files from concept lists.
 
-### Generate the optional graph viewer
+### Browse the memory graph
 
 ```sh
-.venv/bin/okf visualize brain
+npm run dev
 ```
 
-Run the command from the repository root. It writes the tracked `index.html`
-file there. The page embeds the bundle and needs no backend. It loads
-Cytoscape.js and marked from a CDN when a browser opens it.
+Vite reads every concept under `brain/` and updates the open viewer when a
+Markdown file changes. The tracked `index.html` file is the normal Vite entry
+file. The repository does not track generated viewer data or build output.
+
+Build and preview the static viewer with:
+
+```sh
+npm run build
+npm run preview
+```
+
+A static deployment includes the bundle state from its build. Rebuild the
+viewer after a deployed bundle changes.
 
 ## Verification and attestation
 
@@ -105,4 +122,6 @@ an attester, but a problem-specific consumer must execute it safely.
 ```sh
 .venv/bin/pytest
 .venv/bin/pre-commit run --all-files
+npm test
+npm run build
 ```

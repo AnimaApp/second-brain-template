@@ -19,9 +19,6 @@ okf = "okf_tools.cli:main"
 where = ["."]
 include = ["okf_tools*"]
 
-[tool.setuptools.package-data]
-okf_tools = ["viewer/templates/*.html", "viewer/static/*"]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
