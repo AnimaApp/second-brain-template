@@ -38,6 +38,15 @@ def test_cli_validate_index_check_and_visualize(tmp_path: Path):
     assert output.exists()
 
 
+def test_cli_visualize_defaults_to_index_html(tmp_path: Path, monkeypatch):
+    bundle = tmp_path / "bundle"
+    _write_concept(bundle / "notes" / "one.md")
+    monkeypatch.chdir(tmp_path)
+
+    assert main(["visualize", str(bundle)]) == 0
+    assert (tmp_path / "index.html").exists()
+
+
 def test_validate_allows_warning_but_check_fails(tmp_path: Path):
     bundle = tmp_path / "bundle"
     _write_concept(bundle / "note.md", "See [missing](missing.md).\n")

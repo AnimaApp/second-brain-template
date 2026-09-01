@@ -54,7 +54,11 @@ def _parser() -> argparse.ArgumentParser:
         help="Generate a self-contained HTML graph for a bundle.",
     )
     visualize.add_argument("bundle", type=Path)
-    visualize.add_argument("--out", type=Path)
+    visualize.add_argument(
+        "--out",
+        type=Path,
+        help="Output path (default: ./index.html).",
+    )
     visualize.add_argument("--name")
     return parser
 
@@ -131,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "visualize":
         from okf_tools.viewer import generate_visualization
 
-        output = args.out or (args.bundle / "viz.html")
+        output = args.out or Path("index.html")
         try:
             stats = generate_visualization(args.bundle, output, bundle_name=args.name)
         except FileNotFoundError as error:
