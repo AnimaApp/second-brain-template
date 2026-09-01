@@ -115,6 +115,15 @@ def test_viewer_payload_contains_trust_signals(tmp_path: Path):
     assert by_id["projects/brain"]["trust_tier"] == "unverified"
 
 
+def test_viewer_formats_bundle_data_as_indented_json(tmp_path: Path):
+    bundle = tmp_path / "bundle"
+    _make_bundle(bundle)
+    output = tmp_path / "viz.html"
+    generate_visualization(bundle, output)
+
+    assert 'window.BUNDLE = {\n  "nodes": [' in output.read_text(encoding="utf-8")
+
+
 def test_viewer_rejects_missing_bundle(tmp_path: Path):
     with pytest.raises(FileNotFoundError):
         generate_visualization(tmp_path / "missing", tmp_path / "viz.html")

@@ -88,9 +88,9 @@ and excludes the reserved `index.md` and `log.md` files from concept lists.
 .venv/bin/okf visualize bundles/second-brain
 ```
 
-Run the command from the repository root. It writes `index.html` there, and
-Git ignores that generated file. The page embeds the bundle and needs no
-backend. It loads Cytoscape.js and marked from a CDN when a browser opens it.
+Run the command from the repository root. It writes the tracked `index.html`
+file there. The page embeds the bundle and needs no backend. It loads
+Cytoscape.js and marked from a CDN when a browser opens it.
 
 ## Verification and attestation
 
