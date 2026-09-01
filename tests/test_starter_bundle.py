@@ -19,7 +19,7 @@ from okf_tools.validation import validate_bundle
 
 
 def test_starter_bundle_passes_strict_checks():
-    bundle = Path(__file__).parents[1] / "second-brain"
+    bundle = Path(__file__).parents[1] / "brain"
     report = validate_bundle(bundle)
     assert report.findings == []
     assert find_index_drift(bundle) == []

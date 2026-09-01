@@ -2,7 +2,7 @@ repos:
   - repo: local
     hooks:
       - id: okf-check
-        name: Check the second-brain OKF bundle
-        entry: .venv/bin/python -m okf_tools check second-brain
+        name: Check the brain OKF bundle
+        entry: .venv/bin/python -m okf_tools check brain
         language: system
         pass_filenames: false

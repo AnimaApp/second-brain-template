@@ -9,7 +9,7 @@ It does not need a model API, database, ingestion pipeline, or cloud account.
 ## Repository layout
 
 ```text
-second-brain/           The memory bundle
+brain/                  The memory bundle
 okf_tools/              Deterministic OKF tools
 tests/                  Tool and conformance tests
 AGENTS.md               Entry point for agents that read AGENTS.md
@@ -44,8 +44,8 @@ simple: write or change a memory only after the user explicitly asks.
 After a memory change, run:
 
 ```sh
-.venv/bin/okf index second-brain
-.venv/bin/okf check second-brain
+.venv/bin/okf index brain
+.venv/bin/okf check brain
 ```
 
 Then commit only the memory files and generated indexes. Do not push.
@@ -55,7 +55,7 @@ Then commit only the memory files and generated indexes. Do not push.
 ### Check SPEC conformance
 
 ```sh
-.venv/bin/okf validate second-brain
+.venv/bin/okf validate brain
 ```
 
 This command fails only for the three conformance rules in SPEC section 11.
@@ -64,7 +64,7 @@ It reports optional-field, link, source, and freshness problems as warnings.
 ### Run strict repository checks
 
 ```sh
-.venv/bin/okf check second-brain
+.venv/bin/okf check brain
 ```
 
 This command fails on every warning, conformance error, or generated-index
@@ -75,8 +75,8 @@ links, and missing indexes as the SPEC requires.
 ### Generate indexes
 
 ```sh
-.venv/bin/okf index second-brain
-.venv/bin/okf index --check second-brain
+.venv/bin/okf index brain
+.venv/bin/okf index --check brain
 ```
 
 The generator is deterministic. It preserves `okf_version` in the root index
@@ -85,7 +85,7 @@ and excludes the reserved `index.md` and `log.md` files from concept lists.
 ### Generate the optional graph viewer
 
 ```sh
-.venv/bin/okf visualize second-brain
+.venv/bin/okf visualize brain
 ```
 
 Run the command from the repository root. It writes the tracked `index.html`
