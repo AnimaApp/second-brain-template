@@ -17,9 +17,11 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./App.jsx";
 import { brain } from "./brain-files.js";
+import { preferredTheme, readStoredTheme } from "./theme.js";
 import "./styles.css";
 
 document.title = `${brain.name} — OKF Viewer`;
+document.documentElement.dataset.theme = readStoredTheme() || preferredTheme();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

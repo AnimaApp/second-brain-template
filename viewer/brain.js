@@ -137,6 +137,34 @@ export function buildBacklinks(edges) {
   return backlinks;
 }
 
+export function buildUndirectedEdges(edges) {
+  const pairs = new Set();
+  const undirected = [];
+
+  for (const edge of edges) {
+    const { source, target } = edge.data;
+    const [left, right] = source.localeCompare(target) <= 0
+      ? [source, target]
+      : [target, source];
+    const pair = `${left}\0${right}`;
+    if (pairs.has(pair)) {
+      continue;
+    }
+    pairs.add(pair);
+    undirected.push({
+      ...edge,
+      data: {
+        ...edge.data,
+        id: `${left}__${right}`,
+        source: left,
+        target: right,
+      },
+    });
+  }
+
+  return undirected;
+}
+
 function extractLinkPaths(body) {
   return [...body.matchAll(LINK_RE)].map((match) => match[1]);
 }

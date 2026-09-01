@@ -15,78 +15,95 @@
 import cytoscape from "cytoscape";
 import { useEffect, useRef } from "react";
 
-const GRAPH_STYLE = [
-  {
-    selector: "node",
-    style: {
-      "background-color": "data(color)",
-      label: "data(label)",
-      color: "#0f172a",
-      "font-size": 11,
-      "text-valign": "bottom",
-      "text-margin-y": 4,
-      "text-wrap": "wrap",
-      "text-max-width": 120,
-      width: "data(size)",
-      height: "data(size)",
-      "border-width": 1,
-      "border-color": "#0f172a",
-    },
-  },
-  {
-    selector: "node[?stale]",
-    style: {
-      "border-width": 2,
-      "border-color": "#b91c1c",
-      "border-style": "dashed",
-    },
-  },
-  {
-    selector: 'node[status = "deprecated"]',
-    style: { opacity: 0.55 },
-  },
-  {
-    selector: "node:selected",
-    style: {
-      "border-width": 3,
-      "border-color": "#f59e0b",
-    },
-  },
-  {
-    selector: "edge",
-    style: {
-      width: 1.5,
-      "line-color": "#cbd5e1",
-      "target-arrow-color": "#cbd5e1",
-      "target-arrow-shape": "triangle",
-      "curve-style": "bezier",
-      "arrow-scale": 0.9,
-    },
-  },
-  {
-    selector: "edge:selected",
-    style: {
-      "line-color": "#f59e0b",
-      "target-arrow-color": "#f59e0b",
-      width: 2.5,
-    },
-  },
-  {
-    selector: ".dim",
-    style: { opacity: 0.15 },
-  },
-];
+import { buildUndirectedEdges } from "./brain.js";
 
-export function Graph({ bundle, layout, search, selectedId, typeFilter, resetSignal, onSelect }) {
+const GRAPH_THEMES = {
+  light: {
+    text: "#191c22",
+    border: "#596170",
+    edge: "#b8c0cc",
+    accent: "#1a56d0",
+  },
+  dark: {
+    text: "#e6e9ee",
+    border: "#9ea7b3",
+    edge: "#3b434f",
+    accent: "#74a0ff",
+  },
+};
+
+function graphStyle(theme) {
+  const colors = GRAPH_THEMES[theme] || GRAPH_THEMES.light;
+  return [
+    {
+      selector: "node",
+      style: {
+        "background-color": "data(color)",
+        label: "data(label)",
+        color: colors.text,
+        "font-size": 11,
+        "text-valign": "bottom",
+        "text-margin-y": 4,
+        "text-wrap": "wrap",
+        "text-max-width": 120,
+        width: "data(size)",
+        height: "data(size)",
+        "border-width": 1,
+        "border-color": colors.border,
+      },
+    },
+    {
+      selector: "node[?stale]",
+      style: {
+        "border-width": 2,
+        "border-color": "#b91c1c",
+        "border-style": "dashed",
+      },
+    },
+    {
+      selector: 'node[status = "deprecated"]',
+      style: { opacity: 0.55 },
+    },
+    {
+      selector: "node:selected",
+      style: {
+        "border-width": 3,
+        "border-color": colors.accent,
+      },
+    },
+    {
+      selector: "edge",
+      style: {
+        width: 1.5,
+        "line-color": colors.edge,
+        "curve-style": "bezier",
+      },
+    },
+    {
+      selector: "edge:selected",
+      style: {
+        "line-color": colors.accent,
+        width: 2.5,
+      },
+    },
+    {
+      selector: ".dim",
+      style: { opacity: 0.15 },
+    },
+  ];
+}
+
+export function Graph({ bundle, layout, matchingIds, selectedId, resetSignal, theme, onSelect }) {
   const containerRef = useRef(null);
   const graphRef = useRef(null);
 
   useEffect(() => {
     const graph = cytoscape({
       container: containerRef.current,
-      elements: [...bundle.nodes, ...bundle.edges],
-      style: GRAPH_STYLE,
+      elements: [...bundle.nodes, ...buildUndirectedEdges(bundle.edges)],
+      style: graphStyle(theme),
       layout: { name: layout, animate: false, padding: 30 },
+      minZoom: 0.2,
       maxZoom: 2,
     });
     graphRef.current = graph;
@@ -106,6 +123,13 @@ export function Graph({ bundle, layout, search, selectedId, typeFilter, resetSig
 
   useEffect(() => {
     const graph = graphRef.current;
+    if (graph) {
+      graph.style(graphStyle(theme));
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    const graph = graphRef.current;
     if (!graph) {
       return;
     }
@@ -117,18 +141,13 @@ export function Graph({ bundle, layout, search, selectedId, typeFilter, resetSig
     if (!graph) {
       return;
     }
-    const query = search.trim().toLowerCase();
     graph.nodes().forEach((node) => {
-      const data = node.data();
-      const haystack = [data.label || "", data.id, ...(data.tags || [])].join(" ").toLowerCase();
-      const matchesSearch = !query || haystack.includes(query);
-      const matchesType = !typeFilter || data.type === typeFilter;
-      node.toggleClass("dim", !matchesSearch || !matchesType);
+      node.toggleClass("dim", !matchingIds.has(node.id()));
     });
     graph.edges().forEach((edge) => {
       edge.toggleClass("dim", edge.source().hasClass("dim") || edge.target().hasClass("dim"));
     });
-  }, [bundle, search, typeFilter]);
+  }, [bundle, matchingIds]);
 
   useEffect(() => {
     const graph = graphRef.current;
@@ -157,5 +176,36 @@ export function Graph({ bundle, layout, search, selectedId, typeFilter, resetSig
     }
   }, [resetSignal]);
 
-  return <section ref={containerRef} className="graph" aria-label="Concept graph" />;
+  function changeZoom(factor) {
+    const graph = graphRef.current;
+    if (!graph) {
+      return;
+    }
+    const level = Math.min(graph.maxZoom(), Math.max(graph.minZoom(), graph.zoom() * factor));
+    graph.zoom({
+      level,
+      renderedPosition: { x: graph.width() / 2, y: graph.height() / 2 },
+    });
+  }
+
+  function fitGraph() {
+    graphRef.current?.fit(undefined, 30);
+  }
+
+  return (
+    <section className="graph" aria-label="Concept graph">
+      <div ref={containerRef} className="graph-canvas" />
+      <div className="graph-controls" aria-label="Graph zoom controls">
+        <button type="button" aria-label="Zoom in" onClick={() => changeZoom(1.2)}>
+          +
+        </button>
+        <button type="button" aria-label="Zoom out" onClick={() => changeZoom(1 / 1.2)}>
+          −
+        </button>
+        <button className="graph-fit" type="button" aria-label="Fit graph to view" onClick={fitGraph}>
+          Fit
+        </button>
+      </div>
+    </section>
+  );
 }

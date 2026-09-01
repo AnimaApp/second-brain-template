@@ -17,6 +17,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildBacklinks,
   buildBundle,
+  buildUndirectedEdges,
   conceptIdFromPath,
   isReservedPath,
   isStale,
@@ -103,6 +104,20 @@ describe("bundle graph", () => {
       "decisions/format": ["projects/brain"],
     });
     expect(bundle.bodies["projects/brain"]).toContain("decision");
+  });
+
+  it("collapses reverse links into one undirected graph edge", () => {
+    const bundle = buildBundle(FILES);
+
+    expect(buildUndirectedEdges(bundle.edges)).toEqual([
+      {
+        data: {
+          id: "decisions/format__projects/brain",
+          source: "decisions/format",
+          target: "projects/brain",
+        },
+      },
+    ]);
   });
 
   it("uses stable generic type colors", () => {

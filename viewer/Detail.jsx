@@ -77,7 +77,8 @@ export function Detail({ bundle, selectedId, onSelect }) {
     <section className="detail">
       <article>
         <header className="detail-header">
-          <span className="type-chip" style={{ background: data.color }}>
+          <span className="type-chip">
+            <span className="type-chip-dot" style={{ background: data.color }} aria-hidden="true" />
             {data.type}
           </span>
           <h1>{data.label}</h1>
