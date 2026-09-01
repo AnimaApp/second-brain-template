@@ -4,14 +4,14 @@ Contributions fall into three groups:
 
 - Changes to [SPEC.md](SPEC.md) change the Open Knowledge Format standard.
   Open an issue before a format change.
-- Changes to `src/okf_tools/` change deterministic bundle tools.
-- Changes to `bundles/second-brain/` change the starter memory bundle.
+- Changes to `okf_tools/` change deterministic bundle tools.
+- Changes to `brain/` change the starter memory bundle.
 
 Before you submit a pull request:
 
 1. Install the development dependencies from [README.md](README.md).
-2. Run `okf index bundles/second-brain`.
-3. Run `okf check bundles/second-brain`.
+2. Run `okf index brain`.
+3. Run `okf check brain`.
 4. Run `pytest`.
 5. Run `pre-commit run --all-files`.
 

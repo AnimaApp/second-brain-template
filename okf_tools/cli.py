@@ -49,13 +49,6 @@ def _parser() -> argparse.ArgumentParser:
     )
     check.add_argument("bundle", type=Path)
 
-    visualize = subparsers.add_parser(
-        "visualize",
-        help="Generate a self-contained HTML graph for a bundle.",
-    )
-    visualize.add_argument("bundle", type=Path)
-    visualize.add_argument("--out", type=Path)
-    visualize.add_argument("--name")
     return parser
 
 
@@ -128,19 +121,4 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Strict checks passed: {args.bundle}", file=sys.stderr)
             return 0
         return 1
-    if args.command == "visualize":
-        from okf_tools.viewer import generate_visualization
-
-        output = args.out or (args.bundle / "viz.html")
-        try:
-            stats = generate_visualization(args.bundle, output, bundle_name=args.name)
-        except FileNotFoundError as error:
-            print(str(error), file=sys.stderr)
-            return 1
-        print(
-            f"Wrote {stats['concepts']} concept(s), {stats['edges']} edge(s), "
-            f"{stats['bytes']} bytes to {output}",
-            file=sys.stderr,
-        )
-        return 0
     return 1

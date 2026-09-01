@@ -9,8 +9,9 @@ It does not need a model API, database, ingestion pipeline, or cloud account.
 ## Repository layout
 
 ```text
-bundles/second-brain/   The memory bundle
-src/okf_tools/          Deterministic OKF tools
+brain/                  The memory bundle
+okf_tools/              Deterministic OKF tools
+viewer/                 Vite and React viewer source
 tests/                  Tool and conformance tests
 AGENTS.md               Entry point for agents that read AGENTS.md
 CLAUDE.md               Entry point for Claude Code
@@ -36,6 +37,12 @@ Install the local commit hook:
 .venv/bin/pre-commit install
 ```
 
+Install the viewer dependencies with Node.js 20.19 or newer:
+
+```sh
+npm install
+```
+
 ## Memory workflow
 
 Agents must follow [MEMORY_WORKFLOW.md](MEMORY_WORKFLOW.md). The key rule is
@@ -44,8 +51,8 @@ simple: write or change a memory only after the user explicitly asks.
 After a memory change, run:
 
 ```sh
-.venv/bin/okf index bundles/second-brain
-.venv/bin/okf check bundles/second-brain
+.venv/bin/okf index brain
+.venv/bin/okf check brain
 ```
 
 Then commit only the memory files and generated indexes. Do not push.
@@ -55,7 +62,7 @@ Then commit only the memory files and generated indexes. Do not push.
 ### Check SPEC conformance
 
 ```sh
-.venv/bin/okf validate bundles/second-brain
+.venv/bin/okf validate brain
 ```
 
 This command fails only for the three conformance rules in SPEC section 11.
@@ -64,7 +71,7 @@ It reports optional-field, link, source, and freshness problems as warnings.
 ### Run strict repository checks
 
 ```sh
-.venv/bin/okf check bundles/second-brain
+.venv/bin/okf check brain
 ```
 
 This command fails on every warning, conformance error, or generated-index
@@ -75,22 +82,32 @@ links, and missing indexes as the SPEC requires.
 ### Generate indexes
 
 ```sh
-.venv/bin/okf index bundles/second-brain
-.venv/bin/okf index --check bundles/second-brain
+.venv/bin/okf index brain
+.venv/bin/okf index --check brain
 ```
 
 The generator is deterministic. It preserves `okf_version` in the root index
 and excludes the reserved `index.md` and `log.md` files from concept lists.
 
-### Generate the optional graph viewer
+### Browse the memory graph
 
 ```sh
-.venv/bin/okf visualize bundles/second-brain
+npm run dev
 ```
 
-This writes `bundles/second-brain/viz.html`. Git ignores that generated file.
-The page embeds the bundle and needs no backend. It loads Cytoscape.js and
-marked from a CDN when a browser opens it.
+Vite reads every concept under `brain/` and updates the open viewer when a
+Markdown file changes. The tracked `index.html` file is the normal Vite entry
+file. The repository does not track generated viewer data or build output.
+
+Build and preview the static viewer with:
+
+```sh
+npm run build
+npm run preview
+```
+
+A static deployment includes the bundle state from its build. Rebuild the
+viewer after a deployed bundle changes.
 
 ## Verification and attestation
 
@@ -105,4 +122,6 @@ an attester, but a problem-specific consumer must execute it safely.
 ```sh
 .venv/bin/pytest
 .venv/bin/pre-commit run --all-files
+npm test
+npm run build
 ```

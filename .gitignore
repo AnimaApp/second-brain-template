@@ -7,7 +7,7 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+node_modules/
 .DS_Store
 .env
 .claude/
-bundles/**/viz.html

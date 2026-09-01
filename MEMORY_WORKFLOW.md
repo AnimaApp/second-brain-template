@@ -1,7 +1,7 @@
 # Memory workflow
 
 This repository is a second brain for coding agents. Store memories as Open
-Knowledge Format (OKF) concepts under `bundles/second-brain/`.
+Knowledge Format (OKF) concepts under `brain/`.
 
 ## When to write
 
@@ -19,14 +19,14 @@ not create a routine task summary unless the user asks for a memory.
 
 ## Write a memory
 
-1. Read `bundles/second-brain/index.md` and search the bundle for related terms.
+1. Read `brain/index.md` and search the bundle for related terms.
 2. Update an existing concept when it describes the same knowledge.
 3. Otherwise, create a UTF-8 Markdown concept with YAML frontmatter.
 4. Add a non-empty `type`. Add a clear `title` and `description` when possible.
 5. Link related concepts with normal Markdown links.
 6. Add `sources` when the memory depends on another artifact.
-7. Run `okf index bundles/second-brain`.
-8. Run `okf check bundles/second-brain`.
+7. Run `okf index brain`.
+8. Run `okf check brain`.
 9. Fix every finding before you commit.
 10. Commit only the memory files and generated indexes in one focused commit.
 11. Never push the commit.

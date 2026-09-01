@@ -16,11 +16,9 @@ dev = ["pre-commit>=3.0", "pytest>=7.0"]
 okf = "okf_tools.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-data]
-okf_tools = ["viewer/templates/*.html", "viewer/static/*"]
+where = ["."]
+include = ["okf_tools*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["."]
