@@ -10,7 +10,7 @@ It does not need a model API, database, ingestion pipeline, or cloud account.
 
 ```text
 bundles/second-brain/   The memory bundle
-src/okf_tools/          Deterministic OKF tools
+okf_tools/              Deterministic OKF tools
 tests/                  Tool and conformance tests
 AGENTS.md               Entry point for agents that read AGENTS.md
 CLAUDE.md               Entry point for Claude Code
