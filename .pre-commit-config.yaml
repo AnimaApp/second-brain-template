@@ -3,6 +3,6 @@ repos:
     hooks:
       - id: okf-check
         name: Check the second-brain OKF bundle
-        entry: .venv/bin/python -m okf_tools check bundles/second-brain
+        entry: .venv/bin/python -m okf_tools check second-brain
         language: system
         pass_filenames: false
