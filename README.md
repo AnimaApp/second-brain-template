@@ -97,7 +97,8 @@ npm run dev
 
 Vite reads every concept under `brain/` and updates the open viewer when a
 Markdown file changes. The tracked `index.html` file is the normal Vite entry
-file. The repository does not track generated viewer data or build output.
+file. Agent Grid reads the same files from Sandpack's mounted project. Neither
+viewer path needs generated data, and the repository does not track build output.
 
 Build and preview the static viewer with:
 

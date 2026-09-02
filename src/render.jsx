@@ -12,8 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { buildBundle } from "./brain.js";
-import { renderBundle } from "./render.jsx";
-import { readSandpackBrain } from "./sandpack-files.js";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
-renderBundle(buildBundle(readSandpackBrain()));
+import { App } from "./App.jsx";
+import { preferredTheme, readStoredTheme } from "./theme.js";
+import "./styles.css";
+
+export function renderBundle(bundle) {
+  document.title = `${bundle.name} — OKF Viewer`;
+  document.documentElement.dataset.theme = readStoredTheme() || preferredTheme();
+
+  createRoot(document.getElementById("root")).render(
+    <StrictMode>
+      <App bundle={bundle} />
+    </StrictMode>,
+  );
+}

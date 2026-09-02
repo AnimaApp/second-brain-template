@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { buildBundle } from "./brain.js";
+import { brain } from "./brain-files.js";
 import { renderBundle } from "./render.jsx";
-import { readSandpackBrain } from "./sandpack-files.js";
 
-renderBundle(buildBundle(readSandpackBrain()));
+renderBundle(brain);
