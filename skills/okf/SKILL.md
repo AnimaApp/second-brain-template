@@ -49,4 +49,4 @@ status: stable
 Run the repository checks before each memory commit.
 ```
 
-Read [SPEC.md](SPEC.md) for the complete OKF v0.2 rules.
+Read [SPEC.md](reference/SPEC.md) for the complete OKF v0.2 rules.

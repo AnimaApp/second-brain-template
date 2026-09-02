@@ -2,7 +2,7 @@
 
 Contributions fall into three groups:
 
-- Changes to [SPEC.md](SPEC.md) change the Open Knowledge Format standard.
+- Changes to [SPEC.md](skills/okf/reference/SPEC.md) change the Open Knowledge Format standard.
   Open an issue before a format change.
 - Changes to `okf_tools/` change deterministic bundle tools.
 - Changes to `brain/` change the starter memory bundle.

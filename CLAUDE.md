@@ -1,3 +1,3 @@
 # Agent instructions
 
-Read and follow [MEMORY_WORKFLOW.md](MEMORY_WORKFLOW.md) before you change a memory bundle.
+Read and follow [skills/okf/SKILL.md](skills/okf/SKILL.md) before you change a memory bundle.
