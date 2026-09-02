@@ -11,7 +11,7 @@ It does not need a model API, database, ingestion pipeline, or cloud account.
 ```text
 brain/                  The memory bundle
 okf_tools/              Deterministic OKF tools
-viewer/                 Vite and React viewer source
+src/                    Vite and React viewer source
 tests/                  Tool and conformance tests
 AGENTS.md               Entry point for agents that read AGENTS.md
 CLAUDE.md               Entry point for Claude Code

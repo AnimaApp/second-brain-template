@@ -19,6 +19,6 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "node",
-    include: ["viewer/**/*.test.js"],
+    include: ["src/**/*.test.js"],
   },
 });
