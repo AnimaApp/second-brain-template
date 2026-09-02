@@ -10,6 +10,7 @@ It does not need a model API, database, ingestion pipeline, or cloud account.
 
 ```text
 brain/                  The memory bundle
+examples/sample-brain/  Example OKF conformant bundle to use as reference for formatting
 okf_tools/              Deterministic OKF tools
 skills/okf/             OKF memory-writing skill
   reference/SPEC.md     Open Knowledge Format v0.2
