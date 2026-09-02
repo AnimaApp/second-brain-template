@@ -15,7 +15,7 @@ okf_tools/              Deterministic OKF tools
 skills/okf/             OKF memory-writing skill
   reference/SPEC.md     Open Knowledge Format v0.2
   templates/            Empty concept, index, and log templates
-  SKILL.md              Canonical memory-writing rules
+  SKILL.md              Canonical rules for writing, maintaining and consuming memory
 src/                    Vite and React viewer source
 tests/                  Tool and conformance tests
 AGENTS.md               Entry point for agents that read AGENTS.md
