@@ -93,7 +93,7 @@ function graphStyle(theme) {
   ];
 }
 
-export function Graph({ bundle, layout, matchingIds, selectedId, resetSignal, theme, onSelect }) {
+export function Graph({ bundle, matchingIds, selectedId, resetSignal, theme, onSelect }) {
   const containerRef = useRef(null);
   const graphRef = useRef(null);
 
@@ -102,7 +102,7 @@ export function Graph({ bundle, layout, matchingIds, selectedId, resetSignal, th
       container: containerRef.current,
       elements: [...bundle.nodes, ...buildUndirectedEdges(bundle.edges)],
       style: graphStyle(theme),
-      layout: { name: layout, animate: false, padding: 30 },
+      layout: { name: "cose", animate: false, padding: 30 },
       minZoom: 0.2,
       maxZoom: 2,
     });
@@ -133,8 +133,8 @@ export function Graph({ bundle, layout, matchingIds, selectedId, resetSignal, th
     if (!graph) {
       return;
     }
-    graph.layout({ name: layout, animate: false, padding: 30 }).run();
-  }, [layout, bundle]);
+    graph.layout({ name: "cose", animate: false, padding: 30 }).run();
+  }, [bundle]);
 
   useEffect(() => {
     const graph = graphRef.current;

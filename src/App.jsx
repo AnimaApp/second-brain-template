@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Moon, PanelLeft, Sun } from "lucide-react";
 
 import { filterConceptIds } from "./navigation.js";
 import { Sidebar } from "./Sidebar.jsx";
@@ -24,7 +25,6 @@ const Graph = lazy(() => import("./Graph.jsx").then((module) => ({ default: modu
 export function App({ bundle }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
-  const [layout, setLayout] = useState("cose");
   const [selectedId, setSelectedId] = useState(bundle.nodes[0]?.data.id || null);
   const [resetSignal, setResetSignal] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(
@@ -88,12 +88,7 @@ export function App({ bundle }) {
             aria-label={sidebarOpen ? "Hide file sidebar" : "Show file sidebar"}
             onClick={() => setSidebarOpen((open) => !open)}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <rect x="2.25" y="2.75" width="11.5" height="10.5" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
-              <path d="M5.75 3v10" stroke="currentColor" strokeWidth="1.25" />
-              <path d="M3.5 5.25h1" stroke="currentColor" strokeWidth="1.25" />
-              <path d="M3.5 7.75h1" stroke="currentColor" strokeWidth="1.25" />
-            </svg>
+            <PanelLeft size={16} strokeWidth={1.25} aria-hidden="true" />
           </button>
           <div className="title">
             <strong>{bundle.name}</strong>
@@ -115,19 +110,6 @@ export function App({ bundle }) {
               </option>
             ))}
           </select>
-          <select
-            aria-label="Graph layout"
-            id="graph-layout"
-            name="graph-layout"
-            value={layout}
-            onChange={(event) => setLayout(event.target.value)}
-          >
-            <option value="cose">cose (force)</option>
-            <option value="concentric">concentric</option>
-            <option value="breadthfirst">breadth-first</option>
-            <option value="circle">circle</option>
-            <option value="grid">grid</option>
-          </select>
           <button type="button" onClick={resetView}>
             Reset view
           </button>
@@ -139,14 +121,9 @@ export function App({ bundle }) {
             onClick={toggleTheme}
           >
             {theme === "dark" ? (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.25" />
-                <path d="M8 1.75v1.5M8 12.75v1.5M1.75 8h1.5M12.75 8h1.5M3.6 3.6l1.05 1.05M11.35 11.35l1.05 1.05M12.4 3.6l-1.05 1.05M4.65 11.35 3.6 12.4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-              </svg>
+              <Sun size={16} strokeWidth={1.5} aria-hidden="true" />
             ) : (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M12.9 10.2A5.2 5.2 0 0 1 5.8 3.1 5.25 5.25 0 1 0 12.9 10.2Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
-              </svg>
+              <Moon size={16} strokeWidth={1.5} aria-hidden="true" />
             )}
           </button>
         </div>
@@ -186,7 +163,6 @@ export function App({ bundle }) {
         <Suspense fallback={<section className="graph loading-panel muted">Loading graph…</section>}>
           <Graph
             bundle={bundle}
-            layout={layout}
             matchingIds={matchingIds}
             selectedId={selectedId}
             resetSignal={resetSignal}

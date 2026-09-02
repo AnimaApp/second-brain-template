@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Search } from "lucide-react";
 import { useMemo } from "react";
 
 import { buildFolderTree } from "./navigation.js";
@@ -96,17 +97,7 @@ export function Sidebar({
   return (
     <nav className="sidebar" aria-label="Bundle files">
       <div className="sidebar-search-wrap">
-        <svg
-          className="sidebar-search-icon"
-          width="15"
-          height="15"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
-        >
-          <circle cx="7" cy="7" r="4.25" stroke="currentColor" strokeWidth="1.4" />
-          <path d="m10.2 10.2 3 3" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
+        <Search className="sidebar-search-icon" size={15} strokeWidth={1.4} aria-hidden="true" />
         <input
           aria-label="Search bundle files"
           id="concept-search"
