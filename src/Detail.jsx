@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import { useMemo } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import Markdown from "markdown-to-jsx";
 
 import { buildBacklinks, resolveConceptLink } from "./brain.js";
 
@@ -160,9 +159,9 @@ export function Detail({ bundle, selectedId, onSelect }) {
 
         <hr />
         <div className="detail-body">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: MarkdownLink }}>
+          <Markdown options={{ disableParsingRawHTML: true, overrides: { a: MarkdownLink } }}>
             {bundle.bodies[selectedId] || ""}
-          </ReactMarkdown>
+          </Markdown>
         </div>
 
         {citedBy.length ? (

@@ -12,13 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { buildBundle } from "./brain.js";
+import { renderBundle } from "./render.jsx";
+import { readSandpackBrain } from "./sandpack-files.js";
 
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: "node",
-    include: ["src/**/*.test.js"],
-  },
-});
+renderBundle(buildBundle(readSandpackBrain()));

@@ -12,13 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { brain } from "./brain-files.js";
+import { renderBundle } from "./render.jsx";
 
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: "node",
-    include: ["src/**/*.test.js"],
-  },
-});
+renderBundle(brain);
