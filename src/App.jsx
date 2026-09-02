@@ -121,9 +121,9 @@ export function App({ bundle }) {
             onClick={toggleTheme}
           >
             {theme === "dark" ? (
-              <Sun size={16} strokeWidth={1.25} aria-hidden="true" />
+              <Sun size={16} strokeWidth={1.5} aria-hidden="true" />
             ) : (
-              <Moon size={16} strokeWidth={1.25} aria-hidden="true" />
+              <Moon size={16} strokeWidth={1.5} aria-hidden="true" />
             )}
           </button>
         </div>
