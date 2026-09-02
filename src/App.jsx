@@ -24,7 +24,6 @@ const Graph = lazy(() => import("./Graph.jsx").then((module) => ({ default: modu
 export function App({ bundle }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
-  const [layout, setLayout] = useState("cose");
   const [selectedId, setSelectedId] = useState(bundle.nodes[0]?.data.id || null);
   const [resetSignal, setResetSignal] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(
@@ -115,19 +114,6 @@ export function App({ bundle }) {
               </option>
             ))}
           </select>
-          <select
-            aria-label="Graph layout"
-            id="graph-layout"
-            name="graph-layout"
-            value={layout}
-            onChange={(event) => setLayout(event.target.value)}
-          >
-            <option value="cose">cose (force)</option>
-            <option value="concentric">concentric</option>
-            <option value="breadthfirst">breadth-first</option>
-            <option value="circle">circle</option>
-            <option value="grid">grid</option>
-          </select>
           <button type="button" onClick={resetView}>
             Reset view
           </button>
@@ -186,7 +172,6 @@ export function App({ bundle }) {
         <Suspense fallback={<section className="graph loading-panel muted">Loading graph…</section>}>
           <Graph
             bundle={bundle}
-            layout={layout}
             matchingIds={matchingIds}
             selectedId={selectedId}
             resetSignal={resetSignal}
