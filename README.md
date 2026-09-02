@@ -3,20 +3,23 @@
 This repository is a vendor-neutral second-brain template for coding agents.
 It stores durable memories as plain Markdown files with YAML frontmatter.
 
-The template follows the [Open Knowledge Format v0.2 specification](SPEC.md).
+The template follows the [Open Knowledge Format v0.2 specification](skills/okf/reference/SPEC.md).
 It does not need a model API, database, ingestion pipeline, or cloud account.
 
 ## Repository layout
 
 ```text
 brain/                  The memory bundle
+examples/sample-brain/  Example OKF conformant bundle to use as reference for formatting
 okf_tools/              Deterministic OKF tools
+skills/okf/             OKF memory-writing skill
+  reference/SPEC.md     Open Knowledge Format v0.2
+  templates/            Empty concept, index, and log templates
+  SKILL.md              Canonical rules for writing, maintaining and consuming memory
 src/                    Vite and React viewer source
 tests/                  Tool and conformance tests
 AGENTS.md               Entry point for agents that read AGENTS.md
 CLAUDE.md               Entry point for Claude Code
-MEMORY_WORKFLOW.md       Canonical memory-writing rules
-SPEC.md                  Open Knowledge Format v0.2
 ```
 
 The starter bundle contains two linked concepts. Its folders and types are
@@ -45,7 +48,7 @@ npm install
 
 ## Memory workflow
 
-Agents must follow [MEMORY_WORKFLOW.md](MEMORY_WORKFLOW.md). The key rule is
+Agents must follow [skills/okf/SKILL.md](skills/okf/SKILL.md). The key rule is
 simple: write or change a memory only after the user explicitly asks.
 
 After a memory change, run:
