@@ -17,6 +17,11 @@ not create a routine task summary unless the user asks for a memory.
 - Use the actual agent and version for `generated.by` when you know them. Omit
   `generated` when you do not know the correct identity.
 
+## Taxonomy of `brain/`
+
+Aside from the reserved file names `index.md` and `log.md` (according to the OKF standard), the example folders and types are not a fixed taxonomy.
+Add/rename a folder or type when it makes the knowledge easier to find.
+
 ## Produce - write a memory
 
 1. Read [SPEC.md](reference/SPEC.md) for the complete OKF v0.2 rules.
@@ -24,9 +29,6 @@ not create a routine task summary unless the user asks for a memory.
 3. Update an existing concept when it describes the same knowledge.
 4. Otherwise, create a UTF-8 Markdown concept with YAML frontmatter following the concept template from [templates/concept.md](templates/concept.md): set adescriptive `type`, fill recommended fields, record `generated` and the `sources` you actually read, cross-link related concepts via normal Markdown links.
 5. Validate (see below). Fix every error before finishing.
-
-The example folders and types are not a fixed taxonomy. Add a folder or type
-when it makes the knowledge easier to find.
 
 ## Maintain - keep a bundle in sync with reality
 
