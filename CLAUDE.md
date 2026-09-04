@@ -1,3 +1,3 @@
 # Agent instructions
 
-Read and follow [skills/okf/SKILL.md](skills/okf/SKILL.md) before you change a memory bundle.
+Read and follow [ONBOARDING.md](ONBOARDING.md) before you change a memory bundle.
