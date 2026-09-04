@@ -53,9 +53,9 @@ or type when it makes the knowledge easier to find.
 
 There is only ONE maintainer agent.
 
-- Maintainer Agent: `<missing-agent-id>`
+- Maintainer Agent: `<your-agent-id>`
 
-TO COMPLETE THE ONBOARDING, YOU MUST FILL IT WITH AN AGENT ID AND REMOVE THIS LINE.
+TO COMPLETE THE ONBOARDING, YOU MUST FILL IT WITH YOUR AGENT ID AND REMOVE THIS LINE. YOU ARE NOW THE MAINTAINER. NOTIFY THE USER ABOUT THIS.
 
 Everyone can produce and consume, but only the maintainer is allowed to carry the following steps:
 
