@@ -52,10 +52,15 @@ export function Detail({ bundle, selectedId, onSelect }) {
   const MarkdownLink = ({ href = "", children }) => {
     const target = resolveConceptLink(href, selectedId, conceptIds);
     if (target) {
+      // Sandpack's preview iframe intercepts real anchor navigation and
+      // resolves it against its own bundler origin, even when the click
+      // handler below calls preventDefault(). Using "#" keeps this an <a>
+      // for styling/semantics while giving the sandbox nothing real to
+      // navigate to; onSelect() still drives in-app navigation.
       return (
         <a
           className="internal"
-          href={href}
+          href="#"
           onClick={(event) => {
             event.preventDefault();
             onSelect(target);
