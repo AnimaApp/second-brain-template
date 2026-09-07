@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Moon, PanelLeft, Sun } from "lucide-react";
+import { Moon, PanelLeft, PanelRight, Sun } from "lucide-react";
 
 import { filterConceptIds } from "./navigation.js";
 import { Sidebar } from "./Sidebar.jsx";
@@ -21,6 +21,10 @@ import { preferredTheme, readStoredTheme, saveTheme } from "./theme.js";
 
 const Detail = lazy(() => import("./Detail.jsx").then((module) => ({ default: module.Detail })));
 const Graph = lazy(() => import("./Graph.jsx").then((module) => ({ default: module.Graph })));
+
+const MIN_DETAIL_WIDTH = 260;
+const MAX_DETAIL_WIDTH = 640;
+const DEFAULT_DETAIL_WIDTH = 340;
 
 export function App({ bundle }) {
   const [search, setSearch] = useState("");
@@ -30,6 +34,8 @@ export function App({ bundle }) {
   const [sidebarOpen, setSidebarOpen] = useState(
     () => typeof window === "undefined" || !window.matchMedia("(max-width: 860px)").matches,
   );
+  const [detailOpen, setDetailOpen] = useState(true);
+  const [detailWidth, setDetailWidth] = useState(DEFAULT_DETAIL_WIDTH);
   const [theme, setTheme] = useState(() => readStoredTheme() || preferredTheme());
   const [manualTheme, setManualTheme] = useState(() => Boolean(readStoredTheme()));
   const conceptIds = useMemo(() => new Set(bundle.nodes.map((node) => node.data.id)), [bundle.nodes]);
@@ -74,6 +80,29 @@ export function App({ bundle }) {
     setTheme(nextTheme);
     setManualTheme(true);
     saveTheme(nextTheme);
+  }
+
+  function toggleDetail() {
+    setDetailOpen((open) => !open);
+  }
+
+  function handleDetailResizeStart(event) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = detailWidth;
+
+    function handleMove(moveEvent) {
+      const nextWidth = startWidth + (startX - moveEvent.clientX);
+      setDetailWidth(Math.min(MAX_DETAIL_WIDTH, Math.max(MIN_DETAIL_WIDTH, nextWidth)));
+    }
+
+    function handleUp() {
+      document.removeEventListener("pointermove", handleMove);
+      document.removeEventListener("pointerup", handleUp);
+    }
+
+    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointerup", handleUp);
   }
 
   return (
@@ -126,6 +155,16 @@ export function App({ bundle }) {
               <Moon size={16} strokeWidth={1.5} aria-hidden="true" />
             )}
           </button>
+          <button
+            className="icon-button detail-toggle"
+            type="button"
+            aria-controls="concept-detail"
+            aria-expanded={detailOpen}
+            aria-label={detailOpen ? "Hide concept detail" : "Show concept detail"}
+            onClick={toggleDetail}
+          >
+            <PanelRight size={16} strokeWidth={1.25} aria-hidden="true" />
+          </button>
         </div>
       </header>
 
@@ -145,7 +184,12 @@ export function App({ bundle }) {
         </aside>
       ) : null}
 
-      <main className="workspace" data-sidebar-open={sidebarOpen || undefined}>
+      <main
+        className="workspace"
+        data-sidebar-open={sidebarOpen || undefined}
+        data-detail-open={detailOpen ? undefined : "false"}
+        style={detailOpen ? { "--detail-width": `${detailWidth}px` } : undefined}
+      >
         {sidebarOpen ? (
           <aside className="sidebar-pane" id="bundle-sidebar">
             <Sidebar
@@ -170,9 +214,20 @@ export function App({ bundle }) {
             onSelect={selectConcept}
           />
         </Suspense>
-        <Suspense fallback={<section className="detail loading-panel muted">Loading concept…</section>}>
-          <Detail bundle={bundle} selectedId={selectedId} onSelect={selectConcept} />
-        </Suspense>
+        {detailOpen ? (
+          <div className="detail-pane" id="concept-detail">
+            <div
+              className="detail-resize-handle"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize concept detail panel"
+              onPointerDown={handleDetailResizeStart}
+            />
+            <Suspense fallback={<section className="detail loading-panel muted">Loading concept…</section>}>
+              <Detail bundle={bundle} selectedId={selectedId} onSelect={selectConcept} />
+            </Suspense>
+          </div>
+        ) : null}
       </main>
     </div>
   );

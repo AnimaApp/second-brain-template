@@ -255,7 +255,7 @@ a:focus-visible {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr);
+  grid-template-columns: minmax(0, 3fr) var(--detail-width, minmax(260px, 2fr));
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -263,7 +263,15 @@ a:focus-visible {
 }
 
 .workspace[data-sidebar-open="true"] {
-  grid-template-columns: 232px minmax(0, 3fr) minmax(260px, 2fr);
+  grid-template-columns: 232px minmax(0, 3fr) var(--detail-width, minmax(260px, 2fr));
+}
+
+.workspace[data-detail-open="false"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace[data-sidebar-open="true"][data-detail-open="false"] {
+  grid-template-columns: 232px minmax(0, 1fr);
 }
 
 .sidebar-pane {
@@ -484,7 +492,31 @@ a:focus-visible {
   font-weight: 650;
 }
 
+.detail-pane {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.detail-resize-handle {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  z-index: 1;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.detail-resize-handle:hover,
+.detail-resize-handle:active {
+  background: var(--accent-soft);
+}
+
 .detail {
+  height: 100%;
   min-width: 0;
   min-height: 0;
   padding: var(--space-20) var(--space-24) var(--space-24);
@@ -818,9 +850,16 @@ hr {
     border-bottom: 1px solid var(--border);
   }
 
-  .detail {
+  .detail-pane {
     flex: 0 0 auto;
+  }
+
+  .detail {
     overflow-y: visible;
+  }
+
+  .detail-resize-handle {
+    display: none;
   }
 }
 
