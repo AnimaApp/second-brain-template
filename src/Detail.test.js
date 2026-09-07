@@ -38,7 +38,7 @@ describe("concept details", () => {
     }));
 
     expect(html).toContain("<strong>Bold</strong>");
-    expect(html).toContain('<a class="internal" href="other.md">internal</a>');
+    expect(html).toContain('<a class="internal" href="#">internal</a>');
     expect(html).toContain("<table>");
   });
 });
