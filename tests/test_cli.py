@@ -16,6 +16,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from okf_tools.cli import main
 
 
@@ -46,3 +48,21 @@ def test_cli_reports_missing_bundle(tmp_path: Path):
     missing = tmp_path / "missing"
     assert main(["validate", str(missing)]) == 1
     assert main(["index", str(missing)]) == 1
+
+
+@pytest.mark.parametrize("filename", ["note.md", "index.md", "log.md"])
+def test_strict_check_rejects_recoverable_prefix(tmp_path, capsys, filename):
+    bundle = tmp_path / "brain"
+    _write_concept(bundle / "target.md")
+    assert main(["index", str(bundle)]) == 0
+    link = "[Target](/brain/target.md)"
+    if filename == "note.md":
+        _write_concept(bundle / filename, link)
+        assert main(["index", str(bundle)]) == 0
+    elif filename == "index.md":
+        (bundle / filename).write_text(f"# Notes\n\n* {link} - Target.\n")
+    else:
+        (bundle / filename).write_text(f"# Directory Update Log\n\n## 2026-09-23\n* {link}\n")
+    assert main(["validate", str(bundle)]) == 0
+    assert main(["check", str(bundle)]) == 1
+    assert "did you mean `/target.md`?" in capsys.readouterr().err

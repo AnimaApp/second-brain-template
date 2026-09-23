@@ -82,6 +82,25 @@ change. This repository policy is stricter than OKF conformance. OKF consumers
 must still accept unknown types, extra keys, missing optional fields, broken
 links, and missing indexes as the SPEC requires.
 
+### Link paths and continuous checks
+
+A leading `/` in a concept link means the bundle root: use
+`[runbook](/runbooks/x.md)`, not `/brain/runbooks/x.md`. Relative links resolve
+from the containing Markdown file, and local paths must remain inside the
+bundle. Use URLs to cite external assets.
+
+The viewer first resolves the exact path. If an absolute `/brain/...` link
+fails, it retries without that one prefix. Recovered links work in both Vite
+and Sandpack and show a tooltip with the canonical path. This compatibility
+fallback does not correct the Markdown: strict checks still flag the broken
+link and suggest a correction when the target exists.
+
+The **Check brain** GitHub Actions workflow runs strict checks on every push
+and pull request, including links in concepts, indexes, and logs. Fix all
+warnings and errors, regenerate indexes, and rerun the check before finishing.
+To require a passing check before merging, configure branch protection in the
+cloned repository; the workflow alone does not enforce merge restrictions.
+
 ### Generate indexes
 
 ```sh

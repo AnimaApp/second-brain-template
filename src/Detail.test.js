@@ -42,3 +42,16 @@ describe("concept details", () => {
     expect(html).toContain("<table>");
   });
 });
+
+
+it("renders recovered paths as Sandpack-safe links with canonical tooltips", () => {
+  const html = renderToStaticMarkup(createElement(Detail, {
+    bundle: { ...bundle, bodies: {
+      "notes/current": "[recovered](/brain/notes/other.md#section) [missing](/brain/missing.md)",
+    } },
+    selectedId: "notes/current",
+    onSelect() {},
+  }));
+  expect(html).toContain('<a class="internal" href="#" title="Non-canonical path; use /notes/other.md#section">recovered</a>');
+  expect(html).toContain('class="external" href="/brain/missing.md"');
+});

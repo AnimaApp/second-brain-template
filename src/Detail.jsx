@@ -15,7 +15,7 @@
 import { useMemo } from "react";
 import Markdown from "markdown-to-jsx";
 
-import { buildBacklinks, resolveConceptLink } from "./brain.js";
+import { buildBacklinks, resolveConceptLinkDetails } from "./brain.js";
 
 function formatActorEvent(event) {
   if (!event?.by) {
@@ -50,7 +50,8 @@ export function Detail({ bundle, selectedId, onSelect }) {
   const citedBy = backlinks[selectedId] || [];
 
   const MarkdownLink = ({ href = "", children }) => {
-    const target = resolveConceptLink(href, selectedId, conceptIds);
+    const resolution = resolveConceptLinkDetails(href, selectedId, conceptIds);
+    const target = resolution?.target;
     if (target) {
       // Sandpack's preview iframe intercepts real anchor navigation and
       // resolves it against its own bundler origin, even when the click
@@ -61,6 +62,7 @@ export function Detail({ bundle, selectedId, onSelect }) {
         <a
           className="internal"
           href="#"
+          title={resolution.usedFallback ? `Non-canonical path; use ${resolution.canonicalHref}` : undefined}
           onClick={(event) => {
             event.preventDefault();
             onSelect(target);

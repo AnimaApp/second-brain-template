@@ -172,12 +172,19 @@ def _check_links(bundle_root: Path, path: Path, body: str) -> list[Finding]:
         bare_target = target.split("#", 1)[0]
         resolved = resolve_bundle_path(bundle_root, path, bare_target)
         if resolved is None or not resolved.exists():
+            message = f"Markdown link points to a missing bundle target: {target}"
+            prefix = f"/{bundle_root.resolve().name}/"
+            if bare_target.startswith(prefix):
+                canonical = "/" + target[len(prefix):]
+                candidate = resolve_bundle_path(bundle_root, path, canonical.split("#", 1)[0])
+                if candidate is not None and candidate.is_file():
+                    message += f"; did you mean `{canonical}`?"
             findings.append(
                 _finding(
                     "warning",
                     "broken_link",
                     path,
-                    f"Markdown link points to a missing bundle target: {target}",
+                    message,
                 )
             )
     return findings
@@ -675,4 +682,8 @@ def validate_bundle(bundle_root: Path, *, now: datetime | None = None) -> Valida
             findings.extend(_check_log(path))
         else:
             findings.extend(_check_concept(bundle_root, path, reference_time))
+        if path.name in RESERVED_FILENAMES:
+            parsed = _split_reserved(path)
+            if parsed is not None:
+                findings.extend(_check_links(bundle_root, path, parsed[1]))
     return ValidationReport(bundle_root=bundle_root, findings=findings)
