@@ -101,8 +101,12 @@ function typeColor(typeName) {
 }
 
 export function resolveConceptLink(href, conceptId, conceptIds) {
+  return resolveConceptLinkDetails(href, conceptId, conceptIds)?.target ?? null;
+}
+
+export function resolveConceptLinkDetails(href, conceptId, conceptIds, allowFallback = true) {
   const path = href.split("#", 1)[0];
-  if (!path.endsWith(".md")) {
+  if (!path.endsWith(".md") || /^[a-z][a-z0-9+.-]*:/i.test(path) || path.startsWith("//")) {
     return null;
   }
 
@@ -125,7 +129,18 @@ export function resolveConceptLink(href, conceptId, conceptIds) {
   }
 
   const target = normalized.join("/").replace(/\.md$/, "");
-  return conceptIds.has(target) ? target : null;
+  if (conceptIds.has(target)) {
+    return { target, canonicalHref: href, usedFallback: false };
+  }
+  if (allowFallback && path.startsWith("/brain/") && normalized[0] === "brain") {
+    // Resolve again so traversal is checked against the actual bundle root.
+    const stripped = resolveConceptLinkDetails(href.slice("/brain".length), conceptId, conceptIds, false);
+    if (stripped && !stripped.usedFallback) {
+      const fragment = href.includes("#") ? href.slice(href.indexOf("#")) : "";
+      return { target: stripped.target, canonicalHref: `/${stripped.target}.md${fragment}`, usedFallback: true };
+    }
+  }
+  return null;
 }
 
 export function buildBacklinks(edges) {

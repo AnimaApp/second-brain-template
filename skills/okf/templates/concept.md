@@ -27,6 +27,11 @@ sources:                          # what this was derived from; omit if nothing
 <What this concept is and why it matters. Attribute a sourced claim with a
 footnote whose label is a `sources[].id`.[^short-key]>
 
+<!-- Link to an existing concept using a bundle-root path, for example:
+See [related concept](/folder/other.md).
+Replace this example with an existing target or omit it. Never prepend /brain.
+-->
+
 # Schema
 
 <Use for assets with fields/columns; otherwise replace with relevant sections.>

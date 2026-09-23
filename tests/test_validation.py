@@ -17,6 +17,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pytest
+
 from okf_tools.validation import validate_bundle
 
 
@@ -132,3 +134,53 @@ def test_valid_inline_computation_has_one_fenced_block(tmp_path: Path):
         "# Computation\n\n```python\nprint(1)\n```\n",
     )
     assert validate_bundle(tmp_path).findings == []
+
+
+@pytest.mark.parametrize("filename,body", [
+    ("note.md", "---\ntype: Note\n---\n[Target](/brain/target.md#section)"),
+    ("index.md", "# Notes\n\n* [Target](/brain/target.md#section) - Target."),
+    ("log.md", "# Directory Update Log\n\n## 2026-09-23\n* [Target](/brain/target.md#section)"),
+])
+def test_prefix_hint_in_all_markdown_files(tmp_path, filename, body):
+    bundle = tmp_path / "brain"
+    _write(bundle / "target.md", "---\ntype: Note\n---\n")
+    _write(bundle / filename, body)
+    findings = validate_bundle(bundle).findings
+    assert len(findings) == 1
+    assert findings[0].code == "broken_link"
+    assert findings[0].level == "warning"
+    assert "did you mean `/target.md#section`?" in findings[0].message
+
+
+@pytest.mark.parametrize("link,broken", [
+    ("/target.md#section", False),
+    ("target.md", False),
+    ("/brain/missing.md", True),
+    ("brain/target.md", True),
+    ("/brain/brain/target.md", True),
+    ("/brain/../../outside.md", True),
+    ("https://example.com/brain/target.md", False),
+])
+def test_prefix_hints_only_for_existing_in_bundle_targets(tmp_path, link, broken):
+    bundle = tmp_path / "brain"
+    _write(bundle / "target.md", "---\ntype: Note\n---\n")
+    _write(tmp_path / "outside.md", "Outside")
+    _write(bundle / "note.md", f"---\ntype: Note\n---\n[Target]({link})")
+    findings = validate_bundle(bundle).findings
+    assert len(findings) == int(broken)
+    assert all("did you mean" not in finding.message for finding in findings)
+
+
+def test_exact_nested_bundle_path_has_no_hint(tmp_path):
+    bundle = tmp_path / "brain"
+    for name in ("target.md", "brain/target.md"):
+        _write(bundle / name, "---\ntype: Note\n---\n")
+    _write(bundle / "note.md", "---\ntype: Note\n---\n[Target](/brain/target.md)")
+    assert validate_bundle(bundle).findings == []
+
+
+def test_hint_uses_actual_bundle_directory_name(tmp_path):
+    bundle = tmp_path / "knowledge"
+    _write(bundle / "target.md", "---\ntype: Note\n---\n")
+    _write(bundle / "note.md", "---\ntype: Note\n---\n[Target](/knowledge/target.md)")
+    assert "did you mean `/target.md`?" in validate_bundle(bundle).findings[0].message

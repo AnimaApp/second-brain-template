@@ -27,8 +27,19 @@ Add/rename a folder or type when it makes the knowledge easier to find.
 1. Read [SPEC.md](reference/SPEC.md) for the complete OKF v0.2 rules.
 2. Read `brain/index.md` and search the bundle for related terms.
 3. Update an existing concept when it describes the same knowledge.
-4. Otherwise, create a UTF-8 Markdown concept with YAML frontmatter following the concept template from [templates/concept.md](templates/concept.md): set adescriptive `type`, fill recommended fields, record `generated` and the `sources` you actually read, cross-link related concepts via normal Markdown links.
-5. Validate (see below). Fix every error before finishing.
+4. Otherwise, create a UTF-8 Markdown concept with YAML frontmatter following the concept template from [templates/concept.md](templates/concept.md): set a descriptive `type`, fill recommended fields, record `generated` and the `sources` you actually read, cross-link related concepts via normal Markdown links.
+5. Validate (see below). Fix every finding (warning or error) before finishing.
+
+### Links
+
+A leading `/` means the bundle root (`brain/` itself), not the repository
+root. Write `[runbook](/runbooks/x.md)`, not `[runbook](/brain/runbooks/x.md)`.
+Use existing targets; relative links resolve from the containing Markdown file.
+Local paths must stay inside the bundle. Cite external assets with URLs rather
+than paths that escape the bundle.
+
+The viewer tolerates an extra `/brain` prefix for navigation, but the source
+link is still invalid and must be corrected before strict checks can pass.
 
 ### Consume — use a bundle as context
 
@@ -60,4 +71,6 @@ Add/rename a folder or type when it makes the knowledge easier to find.
 
 1. Run `okf index brain`.
 2. Run `okf check brain`.
-3. Fix every finding.
+3. Fix every finding (warning or error), then repeat both commands until
+   `okf check brain` succeeds. If validation cannot run, report the blocker
+   instead of declaring the memory change complete.

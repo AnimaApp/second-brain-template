@@ -161,3 +161,39 @@ describe("trust and freshness", () => {
     expect(isStale({ stale_after: "2026-08-31T00:00:00" }, now)).toBe(false);
   });
 });
+
+
+describe("extra bundle prefix compatibility", () => {
+  const ids = new Set(["notes/target"]);
+  it.each([
+    ["/notes/target.md", "notes/target"],
+    ["/brain/notes/target.md", "notes/target"],
+    ["/brain/notes/target.md#section", "notes/target"],
+    ["target.md", "notes/target"],
+    ["../brain/notes/target.md", null],
+    ["/brain/brain/notes/target.md", null],
+    ["/brain/missing.md", null],
+    ["/brain/../brain/notes/target.md", null],
+    ["/brain/../../notes/target.md", null],
+    ["https://example.com/brain/notes/target.md", null],
+    ["//brain/notes/target.md", null],
+  ])("resolves %s to %s", (href, expected) => {
+    expect(resolveConceptLink(href, "notes/current", ids)).toBe(expected);
+  });
+
+  it("prefers a legitimate nested brain directory", () => {
+    expect(resolveConceptLink("/brain/notes/target.md", "notes/current",
+      new Set([...ids, "brain/notes/target"]))).toBe("brain/notes/target");
+  });
+
+  it("builds deduplicated edges and backlinks for recovered links", () => {
+    const bundle = buildBundle({
+      "/brain/notes/current.md": "---\ntype: Note\n---\n[one](/brain/notes/target.md) [two](/notes/target.md)",
+      "/brain/notes/target.md": "---\ntype: Note\n---\nTarget",
+    });
+    expect(bundle.edges.map(({ data }) => [data.source, data.target])).toEqual([
+      ["notes/current", "notes/target"],
+    ]);
+    expect(buildBacklinks(bundle.edges)).toEqual({ "notes/target": ["notes/current"] });
+  });
+});
